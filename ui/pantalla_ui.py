@@ -1,6 +1,6 @@
 import tkinter as tk
 from core.turnos import TurnoManager
-from core.config import GREEN, PREVIO_COUNT, LOGO_FILE
+from core.config import PREVIO_COUNT
 import os
 
 try:
@@ -8,6 +8,14 @@ try:
     _HAS_WINSOUND = True
 except:
     _HAS_WINSOUND = False
+
+from PIL import Image, ImageTk
+
+GREEN_AIRE = "#9ACD32"
+GREEN_DARK = "#FFFFFF"
+GRAY_BG = "#70E800"
+WHITE = "#676767"
+TEXT_GRAY = "#FFFFFF"
 
 
 class PantallaUI:
@@ -18,41 +26,63 @@ class PantallaUI:
 
         self.root.title("Pantalla de Turnos - AIRE")
         self.root.geometry("1280x720")
-        self.root.configure(bg="#f2f2f2")
+        self.root.configure(bg=GRAY_BG)
 
-        top = tk.Frame(self.root, bg="#f2f2f2")
-        top.pack(side="top", fill="x", pady=20)
+        # ================= CANVAS BASE =================
+        self.canvas = tk.Canvas(root, bg=GRAY_BG, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
 
+        # Barra superior
+        self.canvas.create_rectangle(0, 0, 1280, 110, fill=WHITE, outline="")
+        self.canvas.create_rectangle(0, 110, 1280, 114, fill=GREEN_AIRE, outline="")
+
+        # Tarjeta central
+        self.canvas.create_rectangle(120, 150, 1160, 560, fill=WHITE, outline="")
+
+        # ================= TURNOS PREVIOS =================
+        top_frame = tk.Frame(self.canvas, bg=WHITE)
         self.prev_labels = []
+
         for _ in range(PREVIO_COUNT):
-            lbl = tk.Label(top, text="", font=("Segoe UI", 22),
-                           bg="#f2f2f2", fg="#555")
-            lbl.pack(side="left", expand=True, padx=10)
+            lbl = tk.Label(
+                top_frame,
+                text="",
+                font=("Segoe UI", 22),
+                bg=WHITE,
+                fg=TEXT_GRAY
+            )
+            lbl.pack(side="left", expand=True, padx=15)
             self.prev_labels.append(lbl)
 
-        center = tk.Frame(self.root, bg="#f2f2f2")
-        center.pack(expand=True)
+        self.canvas.create_window(640, 220, window=top_frame)
 
-        self.logo = None
-        if os.path.exists(LOGO_FILE):
-            try:
-                from PIL import Image, ImageTk
-                img = Image.open(LOGO_FILE)
-                img = img.resize((320, 140))
-                self.logo = ImageTk.PhotoImage(img)
-            except:
-                pass
+        # ================= TURNO ACTUAL =================
+        center = tk.Frame(self.canvas, bg=WHITE)
 
-        if self.logo:
-            tk.Label(center, image=self.logo, bg="#f2f2f2").pack(pady=(0, 10))
-        else:
-            tk.Label(center, text="AIRE", font=("Segoe UI", 32, "bold"),
-                     bg="#f2f2f2", fg="#333").pack(pady=(0, 10))
+        self.lbl_turno = tk.Label(
+            center,
+            text="Esperando turno...",
+            font=("Segoe UI", 74, "bold"),
+            bg=WHITE,
+            fg=GREEN_DARK
+        )
+        self.lbl_turno.pack(pady=30)
 
-        self.lbl_turno = tk.Label(center, text="Esperando turno...",
-                                  font=("Segoe UI", 74, "bold"),
-                                  bg="#f2f2f2", fg=GREEN)
-        self.lbl_turno.pack(pady=20)
+        self.canvas.create_window(640, 380, window=center)
+
+        # ================= LOGOS PIE =================
+        self.logo_left = None
+        self.logo_right = None
+
+        if os.path.exists("assets/logo_aire.png"):
+            img = Image.open("assets/logo_aire.png").resize((140, 70))
+            self.logo_left = ImageTk.PhotoImage(img)
+            self.canvas.create_image(40, 690, anchor="sw", image=self.logo_left)
+
+        if os.path.exists("assets/logo_jalisco.png"):
+            img = Image.open("assets/logo_jalisco.png").resize((140, 70))
+            self.logo_right = ImageTk.PhotoImage(img)
+            self.canvas.create_image(1240, 690, anchor="se", image=self.logo_right)
 
         self.update_loop()
 
@@ -61,7 +91,7 @@ class PantallaUI:
             winsound.Beep(1200, 180)
 
     def update_loop(self):
-        self.manager.recargar()  # 🔥 Vuelve a leer el JSON
+        self.manager.recargar()
         turnos = self.manager.turnos
 
         if turnos:
@@ -79,11 +109,9 @@ class PantallaUI:
                 self.prev_labels[i].configure(text=str(v) if v else " ")
 
             self.lbl_turno.configure(text=str(actual))
-
         else:
             for lbl in self.prev_labels:
                 lbl.configure(text=" ")
-
             self.lbl_turno.configure(text="Esperando turno...")
             self.last_turno = None
 

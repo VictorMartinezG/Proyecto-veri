@@ -3,7 +3,6 @@ from tkinter import messagebox
 from core.turnos import TurnoManager
 from core.config import GREEN
 
-
 class ControlUI:
     def __init__(self, root, manager: TurnoManager):
         self.root = root
@@ -125,3 +124,5 @@ class ControlUI:
 
     def mostrar_error(self, msg):
         self.lbl_status.configure(text=msg, fg="red")
+
+
