@@ -1,3 +1,4 @@
+from PIL import Image, ImageTk
 import tkinter as tk
 from core.turnos import TurnoManager
 from core.config import PREVIO_COUNT
@@ -13,7 +14,7 @@ from PIL import Image, ImageTk
 
 GREEN_AIRE = "#9ACD32"
 GREEN_DARK = "#FFFFFF"
-GRAY_BG = "#70E800"
+GRAY_BG = "#9ACD32"
 WHITE = "#676767"
 TEXT_GRAY = "#FFFFFF"
 
@@ -35,6 +36,21 @@ class PantallaUI:
         # Barra superior
         self.canvas.create_rectangle(0, 0, 1280, 110, fill=WHITE, outline="")
         self.canvas.create_rectangle(0, 110, 1280, 114, fill=GREEN_AIRE, outline="")
+        
+        # ================= LOGO VERIFICACIÓN RESPONSABLE (CENTRO SUPERIOR) =================
+        self.logo_header = None
+        header_path = "assets/verificacion_responsable.png"
+
+        if os.path.exists(header_path):
+            img = Image.open(header_path)
+            img = img.resize((420, 60), Image.LANCZOS)
+            self.logo_header = ImageTk.PhotoImage(img)
+
+            # Centrado horizontalmente en la barra superior
+            self.canvas.create_image(
+                640, 55,          # centro X, centro Y de la barra
+                image=self.logo_header
+            )
 
         # Tarjeta central
         self.canvas.create_rectangle(120, 150, 1160, 560, fill=WHITE, outline="")
