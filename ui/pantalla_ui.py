@@ -10,13 +10,13 @@ try:
 except:
     _HAS_WINSOUND = False
 
-from PIL import Image, ImageTk
 
 GREEN_AIRE = "#9ACD32"
-GREEN_DARK = "#FFFFFF"
-GRAY_BG = "#9ACD32"
 WHITE = "#676767"
 TEXT_GRAY = "#FFFFFF"
+BORDER_COLOR = GREEN_AIRE
+TITLE_BG = GREEN_AIRE
+TITLE_TEXT = "#FFFFFF"
 
 
 class PantallaUI:
@@ -26,34 +26,95 @@ class PantallaUI:
         self.last_turno = None
 
         self.root.title("Pantalla de Turnos - AIRE")
-        self.root.geometry("1280x720")
-        self.root.configure(bg=GRAY_BG)
+        self.root.attributes("-fullscreen", True)
+        self.root.overrideredirect(True)
+        self.root.bind("<Escape>", lambda e: self.root.destroy())
+
+        # ================= RESOLUCIÓN REAL =================
+        self.screen_width = self.root.winfo_screenwidth()
+        self.screen_height = self.root.winfo_screenheight()
+        self.root.geometry(f"{self.screen_width}x{self.screen_height}")
 
         # ================= CANVAS BASE =================
-        self.canvas = tk.Canvas(root, bg=GRAY_BG, highlightthickness=0)
+        self.canvas = tk.Canvas(
+            root,
+            width=self.screen_width,
+            height=self.screen_height,
+            bg=GREEN_AIRE,
+            highlightthickness=0
+        )
         self.canvas.pack(fill="both", expand=True)
 
-        # Barra superior
-        self.canvas.create_rectangle(0, 0, 1280, 110, fill=WHITE, outline="")
-        self.canvas.create_rectangle(0, 110, 1280, 114, fill=GREEN_AIRE, outline="")
-        
-        # ================= LOGO VERIFICACIÓN RESPONSABLE (CENTRO SUPERIOR) =================
-        self.logo_header = None
+        # ================= BARRA SUPERIOR =================
+        self.header_height = int(self.screen_height * 0.15)
+
+        self.canvas.create_rectangle(
+            0, 0,
+            self.screen_width, self.header_height,
+            fill=WHITE,
+            outline=""
+        )
+
+        self.canvas.create_rectangle(
+            0,
+            self.header_height,
+            self.screen_width,
+            self.header_height + 4,
+            fill=GREEN_AIRE,
+            outline=""
+        )
+
+        # ================= LOGO HEADER =================
         header_path = "assets/verificacion_responsable.png"
-
         if os.path.exists(header_path):
-            img = Image.open(header_path)
-            img = img.resize((420, 60), Image.LANCZOS)
+            img = Image.open(header_path).resize((420, 60), Image.LANCZOS)
             self.logo_header = ImageTk.PhotoImage(img)
-
-            # Centrado horizontalmente en la barra superior
             self.canvas.create_image(
-                640, 55,          # centro X, centro Y de la barra
+                self.screen_width // 2,
+                self.header_height // 2,
                 image=self.logo_header
             )
 
-        # Tarjeta central
-        self.canvas.create_rectangle(120, 150, 1160, 560, fill=WHITE, outline="")
+        # ================= TARJETA CENTRAL =================
+        card_width = int(self.screen_width * 0.9)
+        card_height = int(self.screen_height * 0.65)
+
+        x1 = (self.screen_width - card_width) // 2
+        y1 = (self.screen_height - card_height) // 2
+        x2 = x1 + card_width
+        y2 = y1 + card_height
+
+        self.canvas.create_rectangle(x1, y1, x2, y2, fill=WHITE, outline="")
+
+        # ===== MARCO FOLIOS ANTERIORES =====
+        prev_box_x1 = x1 + int(card_width * 0.05)
+        prev_box_x2 = x2 - int(card_width * 0.05)
+        prev_box_y1 = y1 + int(card_height * 0.08)
+        prev_box_y2 = y1 + int(card_height * 0.35)
+
+        self.canvas.create_rectangle(
+            prev_box_x1, prev_box_y1,
+            prev_box_x2, prev_box_y2,
+            outline=BORDER_COLOR,
+            width=4
+        )
+
+        self.canvas.create_rectangle(
+            prev_box_x1,
+            prev_box_y1 - 30,
+            prev_box_x1 + 260,
+            prev_box_y1,
+            fill=TITLE_BG,
+            outline=""
+        )
+
+        self.canvas.create_text(
+            prev_box_x1 + 130,
+            prev_box_y1 - 15,
+            text="FOLIOS ANTERIORES",
+            fill=TITLE_TEXT,
+            font=("Segoe UI", 16, "bold")
+        )
 
         # ================= TURNOS PREVIOS =================
         top_frame = tk.Frame(self.canvas, bg=WHITE)
@@ -63,14 +124,48 @@ class PantallaUI:
             lbl = tk.Label(
                 top_frame,
                 text="",
-                font=("Segoe UI", 22),
+                font=("Segoe UI", int(self.screen_height * 0.09)),
                 bg=WHITE,
                 fg=TEXT_GRAY
             )
-            lbl.pack(side="left", expand=True, padx=15)
+            lbl.pack(side="left", expand=True, padx=50)
             self.prev_labels.append(lbl)
 
-        self.canvas.create_window(640, 220, window=top_frame)
+        self.canvas.create_window(
+            self.screen_width // 2,
+            y1 + int(card_height * 0.21),
+            window=top_frame
+        )
+
+        # ===== MARCO FOLIO ACTUAL =====
+        actual_box_x1 = x1 + int(card_width * 0.05)
+        actual_box_x2 = x2 - int(card_width * 0.05)
+        actual_box_y1 = y1 + int(card_height * 0.45)
+        actual_box_y2 = y2 - int(card_height * 0.08)
+
+        self.canvas.create_rectangle(
+            actual_box_x1, actual_box_y1,
+            actual_box_x2, actual_box_y2,
+            outline=BORDER_COLOR,
+            width=4
+        )
+
+        self.canvas.create_rectangle(
+            actual_box_x1,
+            actual_box_y1 - 35,
+            actual_box_x1 + 220,
+            actual_box_y1,
+            fill=TITLE_BG,
+            outline=""
+        )
+
+        self.canvas.create_text(
+            actual_box_x1 + 110,
+            actual_box_y1 - 18,
+            text="FOLIO ACTUAL",
+            fill=TITLE_TEXT,
+            font=("Segoe UI", 18, "bold")
+        )
 
         # ================= TURNO ACTUAL =================
         center = tk.Frame(self.canvas, bg=WHITE)
@@ -78,27 +173,53 @@ class PantallaUI:
         self.lbl_turno = tk.Label(
             center,
             text="Esperando turno...",
-            font=("Segoe UI", 74, "bold"),
+            font=("Segoe UI", int(self.screen_height * 0.16), "bold"),
             bg=WHITE,
-            fg=GREEN_DARK
+            fg="white"
         )
-        self.lbl_turno.pack(pady=30)
+        self.lbl_turno.pack(pady=20)
 
-        self.canvas.create_window(640, 380, window=center)
+        self.canvas.create_window(
+            self.screen_width // 2,
+            y1 + int(card_height * 0.70),
+            window=center
+        )
 
         # ================= LOGOS PIE =================
-        self.logo_left = None
-        self.logo_right = None
-
         if os.path.exists("assets/logo_aire.png"):
             img = Image.open("assets/logo_aire.png").resize((140, 70))
             self.logo_left = ImageTk.PhotoImage(img)
-            self.canvas.create_image(40, 690, anchor="sw", image=self.logo_left)
+            self.canvas.create_image(
+                30,
+                self.screen_height - 30,
+                anchor="sw",
+                image=self.logo_left
+            )
 
         if os.path.exists("assets/logo_jalisco.png"):
             img = Image.open("assets/logo_jalisco.png").resize((140, 70))
             self.logo_right = ImageTk.PhotoImage(img)
-            self.canvas.create_image(1240, 690, anchor="se", image=self.logo_right)
+            self.canvas.create_image(
+                self.screen_width - 30,
+                self.screen_height - 30,
+                anchor="se",
+                image=self.logo_right
+            )
+
+        # ================= MENSAJE PIE DE PÁGINA =================
+        self.lbl_mensaje = tk.Label(
+            self.canvas,
+            text="Favor de pasar al área de entrega de resultados",
+            font=("Segoe UI", int(self.screen_height * 0.035), "bold"),
+            bg=GREEN_AIRE,
+            fg="white"
+        )
+
+        self.canvas.create_window(
+            self.screen_width // 2,
+            self.screen_height - 110,
+            window=self.lbl_mensaje
+        )
 
         self.update_loop()
 

@@ -1,13 +1,13 @@
-# run_sistema.py
-# Lanza pantalla (TV) y control (operador) al mismo tiempo
+from multiprocessing import Process
+from main_pantalla import main as pantalla_main
+from main_control import main as control_main
 
-import subprocess
-import sys
-import os
+if __name__ == "__main__":
+    p1 = Process(target=pantalla_main)
+    p2 = Process(target=control_main)
 
-PYTHON = sys.executable
+    p1.start()
+    p2.start()
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-subprocess.Popen([PYTHON, os.path.join(BASE_DIR, "main_pantalla.py")])
-subprocess.Popen([PYTHON, os.path.join(BASE_DIR, "main_control.py")])
+    p1.join()
+    p2.join()
