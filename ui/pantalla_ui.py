@@ -67,7 +67,7 @@ class PantallaUI:
         # ================= LOGO HEADER =================
         header_path = "assets/verificacion_responsable.png"
         if os.path.exists(header_path):
-            img = Image.open(header_path).resize((420, 60), Image.LANCZOS)
+            img = Image.open(header_path).resize((700, 70), Image.LANCZOS)
             self.logo_header = ImageTk.PhotoImage(img)
             self.canvas.create_image(
                 self.screen_width // 2,
@@ -173,7 +173,7 @@ class PantallaUI:
         self.lbl_turno = tk.Label(
             center,
             text="Esperando turno...",
-            font=("Segoe UI", int(self.screen_height * 0.16), "bold"),
+            font=("Segoe UI", int(self.screen_height * 0.12), "bold"),
             bg=WHITE,
             fg="white"
         )
@@ -181,7 +181,7 @@ class PantallaUI:
 
         self.canvas.create_window(
             self.screen_width // 2,
-            y1 + int(card_height * 0.70),
+            y1 + int(card_height * 0.68),
             window=center
         )
 
@@ -210,7 +210,7 @@ class PantallaUI:
         self.lbl_mensaje = tk.Label(
             self.canvas,
             text="Favor de pasar al área de entrega de resultados",
-            font=("Segoe UI", int(self.screen_height * 0.035), "bold"),
+            font=("Segoe UI", int(self.screen_height * 0.045), "bold"),
             bg=GREEN_AIRE,
             fg="white"
         )
