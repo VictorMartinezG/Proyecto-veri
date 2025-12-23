@@ -225,7 +225,14 @@ class PantallaUI:
 
     def play_beep(self):
         if _HAS_WINSOUND:
-            winsound.Beep(1200, 180)
+            try:
+                ruta = os.path.join("assets", "sounds", "cambio_turno.wav")
+                winsound.PlaySound(
+                    ruta,
+                    winsound.SND_FILENAME | winsound.SND_ASYNC
+                )
+            except:
+                pass
 
     def update_loop(self):
         self.manager.recargar()
